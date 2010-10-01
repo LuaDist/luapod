@@ -1,0 +1,15 @@
+--- This file is part of LuaDist project
+
+name = "luapod"
+version = "0.1"
+
+desc = "Plain Old Documentation, or just POD, is a simple documentation format used mainly among users of the Perl programming language."
+author = "Sérgio Medeiros"
+license = "MIT/X11"
+url = "http://www.lua.inf.puc-rio.br/~sergio/luapod/index.html"
+maintainer = "Peter Kapec"
+
+depends = {
+	"lua ~> 5.1",
+	"lpeg >= 0.6",
+}
