@@ -1,0 +1,26 @@
+type = "x86"
+arch = "Windows"
+author = "Sérgio Medeiros"
+depends = {
+[[lua ~> 5.1]],
+[[lpeg >= 0.6]],
+}
+
+desc = "Plain Old Documentation, or just POD, is a simple documentation format used mainly among users of the Perl programming language."
+version = "0.1"
+maintainer = "Peter Kapec"
+files = {
+Runtime = {
+[[lib\lua\pod.lua]],
+}
+,
+Documentation = {
+[[share\luapod\doc\\index-pt.html]],
+[[share\luapod\doc\\index.html]],
+}
+,
+}
+
+license = "MIT/X11"
+name = "luapod"
+url = "http://www.lua.inf.puc-rio.br/~sergio/luapod/index.html"

@@ -1,0 +1,401 @@
+<html>
+<head>
+<title>LuaPOD - Um parser para documentos POD usando Lua</title>
+</head>
+<body bgcolor="white">
+
+<h1>LuaPOD - Um parser para documentos POD usando Lua</h1>
+<hr>
+
+<h3>
+<a href="#Introducao">Introdu&ccedil;&atilde;o</a>
+<br>
+<a href="#POD">POD</a>
+<br>
+<a href="#Funcionamento_Basico">Funcionamento B&aacute;sico</a>
+<br>
+<a href="#Usando_LuaPOD">Usando LuaPOD</a>
+<br>
+<a href="#Obtendo_LuaPOD">Obtendo LuaPOD</a>
+<br>
+<a href="#Contato">Contato</a>
+<br>
+<a href="#Licenca">Licen&ccedil;a</a>
+</h3>
+
+<hr>
+
+<h2><a name="Introducao">Introdu&ccedil;&atilde;o</a></h2>
+
+
+<p align="justify">
+<i>Plain Old Documentation</i>, ou simplesmente <b>POD</b>, &eacute; um formato de documenta&ccedil;&atilde;o
+simples utilizado principalmente entre os usu&aacute;rios da linguagem de programa&ccedil;&atilde;o
+<a href="http://www.perl.org/">Perl</a>. A maior parte da documenta&ccedil;&atilde;o do mundo Perl &eacute;
+feita utilizando POD.
+</p>
+
+<p align="justify">
+Embora POD tenha sido projetado de forma que um arquivo POD pudesse ser lido sem a necessidade de se utilizar
+uma ferramenta de formata&ccedil;&atilde;o, na maioria das vezes o arquivo POD &eacute; traduzido para algum
+outro formato, como <i>HTML</i> ou <i>TeX</i>, por exemplo.
+</p>
+
+
+<p align="justify">
+LuaPOD &eacute; uma ferramenta que permite traduzir um arquivo no formato POD para o formato HTML, utilizando
+a linguagem <a href="http://www.lua.org">Lua</a> e a biblioteca <a href="http://www.inf.puc-rio.br/~roberto/lpeg.html">LPeg</a>.
+</p>
+
+<p align="justify">
+LuaPOD baseia-se na especifica&ccedil;&atilde;o POD dispon&iacute;vel em
+<a href="http://search.cpan.org/~nwclark/perl-5.8.8/pod/perlpodspec.pod">
+http://search.cpan.org/~nwclark/perl-5.8.8/pod/perlpodspec.pod</a>, contudo,
+possui algumas diferen&ccedil;as:
+</p>
+
+<ul>
+
+<li>
+<p align="justify">
+Para LuaPOD, um arquivo POD deve estar delimitado pelos marcadores <code>=pod</code> e <code>=cut</code>,
+sendo que este &uacute;ltimo &eacute; opcional e pode ser omitido. 
+</p>
+
+<li>
+<p align="justify">
+Diferentemente da especifica&ccedil;&atilde;o de POD, LuaPOD espera que voc&ecirc; explicitamente termine cada regi&atilde;o
+<code>=over</code> com um comando <code>=back</code> correspondente. 
+</p>
+
+<li>
+<p align="justify">
+O comando <code>=enconding</code> n&atilde;o foi implementado.
+</p>
+
+<li>
+<p align="justify">
+C&oacute;digos de escape s&atilde;o tratados como uma refer&ecirc;ncia a uma entidade HTML, dessa forma,
+<code>&lt;foo&gt;</code> &eacute; traduzido para <code>&amp;foo;</code>.
+</p>
+
+
+</ul>
+
+
+
+<h2><a name="POD">POD</a></h2>
+
+
+<h3>Par&aacute;grafos</h3>
+
+<p align="justify">
+Exitem tr&ecirc;s tipos de par&aacute;grafos num texto POD: par&aacute;grafos ordin&aacute;rios, par&aacute;grafos
+verbatim e par&aacute;grafos de comando. Em um arquivo POD, a maior parte do texto resume-se a par&aacute;grafos
+ordin&aacute;rios, os quais representam um bloco de texto sem qualquer marca&ccedil;&atilde;o e com uma linha
+em branco antes e depois. Neste tipo de par&aacute;grafo &eacute; poss&iacute;vel utilizar c&oacute;digos de
+formata&ccedil;&atilde;o, que ser&atilde;o abordados mais adiante.
+</p>
+
+<p align="justify">
+Um par&aacute;grafo verbatim geralmente &eacute; utilizado para apresentar um bloco de c&oacute;digo e n&atilde;o
+aceita c&oacute;digos de formata&ccedil;&atilde;o. Um par&aacute;grafo verbatim deve ter como seu primeiro
+caractere um espa&ccedil;o ou um tab.
+</p>
+
+
+<p align="justify">
+Os par&aacute;grafos de comando iniciam com um <i>=</i>, seguido por um identificador. Abaixo segue uma lista
+dos comandos atualmente reconhecidos por LuaPOD:
+</p>
+
+<ul>
+
+<p align="justify">
+<li><b>=pod</b>: indica o in&iacute;cio de um arquivo POD.
+</p>
+
+<p align="justify">
+<li><b>=head1</b>: indica um cabe&ccedil;alho/se&ccedil;&atilde;o, o texto no resto do par&aacute;grafo &eacute;
+o conte&uacute;do da se&ccedil;&atilde;o.
+</p>
+
+<p align="justify">
+<li><b>=head2</b>, <b>=head3</b> e <b>=head4</b>: semelhantes a <code>=head1</code>.
+</p>
+
+<p align="justify">
+<li><b>=over</b>: inicia uma regi&atilde;o de lista, dentro da qual voc&ecirc; pode criar novos itens
+com o comando <code>=item</code>.
+</p>
+
+<p align="justify">
+<li><b>=item</b>: cria um novo item.
+</p>
+
+<p align="justify">
+<li><b>=back</b>: termina uma regi&atilde;o de lista.
+</p>
+
+<p align="justify">
+<li><b>=begin</b>: inicia uma regi&atilde;o que n&atilde;o ser&aacute; interpretada como um texto POD normal, seguindo
+portanto outras regras de formata&ccedil;&atilde;o.
+</p>
+
+<p align="justify">
+<li><b>=end</b>: termina uma regi&atilde;o <code>=begin</code>.
+</p>
+
+<p align="justify">
+<li><b>=for</b>: equivalente a <code>=begin</code>, mas v&aacute;lido apenas para um paragr&aacute;fo.
+</p>
+
+</ul>
+
+
+<h3>C&oacute;digos de Formata&ccedil;&atilde;o</h3>
+
+<p align="justify">
+Em par&aacute;grafos ordin&aacute;rios e em alguns par&aacute;grafos de comando, v&aacute;rios c&oacute;digos
+de formata&ccedil;&atilde;o podem ser utilizados:
+</p>
+
+<ul>
+
+<p align="justify">
+<li><b>I&lt;texto&gt;</b>: texto em it&aacute;lico.
+</p>
+
+<p align="justify">
+<li><b>B&lt;texto&gt;</b>: texto em negrito.
+</p>
+
+<p align="justify">
+<li><b>C&lt;c&oacute;digo&gt;</b>: texto representando um c&oacute;digo.
+</p>
+
+<p align="justify">
+<li><b>F&lt;arquivo&gt;</b>: usado para nomes de arquivos.
+</p>
+
+<p align="justify">
+<li><b>E&lt;escape&gt;</b>: um caractere de escape.
+<br><br>
+Exemplos:
+<br><br>E&lt;lt&gt;: um literal &lt; (menor que)
+<br><br>E&lt;gt&gt;: um literal &gt; (maior que)
+</p>
+
+
+<p align="justify">
+<li><b>L&lt;nome&gt;</b>: este &eacute; o c&oacute;digo mais complicado e &eacute; utilizado para links. Em LuaPOD, este
+c&oacute;digo &eacute; interpretado da seguinte maneira:
+</p>
+
+<p align="justify">
+<b>L&lt;nome&gt;</b>: representa um link para uma p&aacute;gina, depende do endere&ccedil;o base que foi fornecido na
+configura&ccedil;&atilde;o de LuaPOD. Se o endere&ccedil;o base fornecido fosse <i>http://www.lua.org/</i>, o link
+produzido seria <i>http://www.lua.org/nome</i>.
+</p>
+
+<p align="justify">
+<b>L&lt;nome/"sec"&gt;</b>: representa um link para uma se&ccedil;&atilde;o de uma p&aacute;gina, tamb&eacute;m
+depende do ender&ccedil;o base de LuaPOD.
+</p>
+
+<p align="justify">
+<b>L&lt;/"sec"&gt;</b>: representa um link para uma se&ccedil;&atilde;o da p&aacute;gina atual.
+</p>
+
+<p align="justify">
+&Eacute; poss&iacute;vel tamb&eacute;m escolher o texto que ser&aacute; usado para mostrar o link. Coloque o texto
+antes do nome da p&aacute;gina, separando-os com uma barra vertical, como em
+<b>L&lt;Texto|nome/"sec"&gt;</b>.
+</p>
+
+<p align="justify">
+&Eacute; poss&iacute;vel ainda criar links para p&aacute;ginas web de maneira absoluta: <b>L&lt;http://www.lua.org&gt;</b>.
+Neste caso, somente o endere&ccedil;o da p&aacute;gina web deve ser fornecido, n&atilde;o existindo, portanto, os demais
+campos.
+</p>
+
+</ul>
+
+<h3>Exemplo de Arquivo POD</h3>
+
+
+<p align="justify">
+Abaixo, encontra-se um exemplo de um arquivo POD. Para obter mais
+informa&ccedil;&otilde;es sobre POD, siga
+<a href="http://search.cpan.org/~nwclark/perl-5.8.8/pod/perlpod.pod">este</a> link.
+</p>
+
+<pre>
+=pod
+
+=head1 Nome
+
+Um paragrafo!
+
+B&lt;Lembre-se&gt; dos codigos de formatacao
+
+=over
+
+=item * Este eh um item
+
+=item * Outro item
+
+=back
+
+    Um paragrafo verbatim
+que continua aqui
+
+=cut
+</pre>
+
+
+<h2><a name="Funcionamento_Basico">Funcionamento B&aacute;sico</a></h2>
+
+
+<p align="justify">
+LuaPOD utiliza LPeg, uma nova biblioteca de Lua para o casamento de padr&otilde;es que &eacute; baseada
+em Gram&aacute;ticas de Parsing de Express&otilde;es - <i>Parsing Expression Grammas</i> (PEGs).
+</p>
+
+
+<p align="justify">
+Dado um arquivo POD, o seu parsing ser&aacute; feito em duas etapas. LuaPOD possui uma gram&aacute;tica
+PEG que descreve a estrutura geral de um arquivo POD, mas que n&atilde;o se preocupa em tratar os
+c&oacute;dios de formata&ccedil;&atilde;o.
+</p>
+
+<p align="justify">
+De maneira geral, cada produ&ccedil;&atilde;o da gram&aacute;tica PEG possui uma fun&ccedil;&atilde;o
+associada, a qual realizar&aacute; alguma a&ccedil;&atilde;o e chamar&aacute; uma fun&ccedil;&atilde;o
+repons&aacute;vel por gerar a sa&iacute;da do arquivo POD. Antes de gerar a sa&iacute;da, caso as
+regras de formata&ccedil;&atilde;o sejam v&aacute;lidas na regi&atilde;o de texto atual, &eacute;
+feita uma chamada &agrave; fun&ccedil;&atilde;o <code>parsing</code> que resolver&aacute; os
+c&oacute;digos de formata&ccedil;&atilde;o apropriadamente.
+</p>
+
+<p align="justify">
+As fun&ccedil;&otilde;es respons&aacute;veis pelo tratamento de c&oacute;digos de
+formata&ccedil;&atilde;o s&atilde;o descritas na tabela <code>tags</code> e podem ser
+modificadas facilmente.
+</p>
+
+<p align="justify">
+Como c&oacute;digos de formata&ccedil;&atilde;o podem ser aninhados, a fun&ccedil;&atilde;o
+<code>parsing</code> tenta, a cada vez, achar um conjunto de caracteres indicando o come&ccedil;o
+ou o fim de um c&oacute;digo de formata&ccedil;&atilde;o. Caso seja o in&iacute;cio de um c&oacute;digo
+de formata&ccedil;&atilde;o, ele ser&aacute; guardado na tabela <code>formatTable</code>, caso
+seja o fim de um c&oacute;digo de formata&ccedil;&atilde;o, verifica-se se ele est&aacute;
+de acordo com o c&oacute;digo de formata&ccedil;&atilde;o que foi aberto por &uacute;ltimo.
+No final da fun&ccedil;&atilde;o, os c&oacute;digos que n&atilde;o foram casados
+s&atilde;o ent&atilde;o fechados.
+</p>
+
+
+
+
+<h2><a name="Usando_LuaPOD">Usando LuaPOD</a></h2>
+
+
+<p align="justify">
+Para usar LuaPOD em seu programa Lua a primeira coisa a fazer &eacute; <code>require ("pod")</code>. Feito isso,
+voc&ecirc; pode usar as fun&ccedil;&otilde;es <code>parser</code> e <code>parserToBuffer</code>, as quais s&atilde;o
+descritas a seguir:
+</p>
+
+<ul>
+
+<li><p align="justify">
+<b>parser (input, url, embedded, output)</b>: realiza o parsing do arquivo de entrada <i>input</i>, tomando <i>url</i> como o
+endere&ccedil;o base para a resolu&ccedil;&atilde;o de links, e imprime a sa&iacute;da para o arquivo <i>output</i>.
+Caso <i>output</i> seja <code>nil</code>, a sa&iacute;da ser&aacute; gerada para um arquivo <i>.html</i> com o mesmo
+nome de <i>input</i>. O par&acirc;metro <i>embedded</i> deve possui um valor booleano indicando se o HTML gerado por LuaPOD
+ser&aacute; embutido em outro arquivo. Se for este o caso, n&atilde;o ser&atilde;o gerados alguns marcadores, como
+<i>&lt;head&gt;</i> e <i>&lt;body&gt;</i>.
+</p>
+
+<p align="justify">
+Exemplo: <code>pod.parser ("file.pod", "http://www.lua.org/", false, "file.html")</code>
+</p>
+
+
+
+<li><p align="justify">
+<b>parserToBuffer (text, url, embedded)</b>: faz o parsing do texto <i>text</i>, usando <i>url</i> como o endere&ccedil;o
+base para a resolu&ccedil;&atilde;o de links, e retorna o resultado do parsing. 
+O par&acirc;metro <i>embedded</i> deve possui um valor booleano indicando se o HTML gerado por LuaPOD
+ser&aacute; embutido em outro arquivo. Se for este o caso, n&atilde;o ser&atilde;o gerados alguns marcadores, como
+<i>&lt;head&gt;</i> e <i>&lt;body&gt;</i>.
+</p>
+
+<p align="justify">
+Exemplo: <code>local html = pod.parserToBuffer ("=pod\n=cut", "http://www.lua.org/", true)</code>
+</p>
+
+
+</ul>
+
+
+<p align="justify">
+Em caso de um erro na estrutura do arquivo, isto &eacute;, ela n&atilde;o est&aacute; de acordo com a gram&aacute;tica
+descrita em LuaPOD, o arquivo de sa&iacute;da (valor retornado) ser&aacute; vazio.
+</p>
+
+
+<h2><a name="Obtendo_LuaPOD">Obtendo LuaPOD</a></h2>
+
+<p align="justify">
+Como LPeg n&atilde;o faz parte da distribui&ccedil;&atilde;o padr&atilde;o de Lua, &eacute; necess&aacute;rio que voc&ecirc;
+fa&ccedil;a o download de LPeg e instale a biblioteca de modo a poder usar LuaPOD. Siga
+<a href="http://www.inf.puc-rio.br/~roberto/lpeg.html#download">este</a> link para fazer o download de Lpeg.
+</p>
+
+
+<p align="justify">
+Para fazer o download de LuaPOD, clique <a href="http://luaforge.net/frs/?group_id=288">aqui</a>.
+</p>
+
+<p align="justify">
+Tamb&eacute;m &eacute; poss&iacute;vel obter LuaPOD a partir do reposit&oacute;rio do Google Code usando o seguinte
+comando (&eacute; preciso ter a ferramenta <i>svn</i> instalada)
+<br><br>
+<code>svn checkout http://luapod.googlecode.com/svn/trunk/ luapod</code>
+</p>
+
+
+<h2><a name="Contato">Contato</a></h2>
+
+<p align="justify">
+LuaPOD foi desenvolvida por S&eacute;rgio Medeiros e &eacute; um software livre.
+Se voc&ecirc; deseja fazer algum coment&aacute;rio ou possui alguma d&uacute;vida, por favor envie
+uma mensagem para smedeiros arroba inf ponto puc-rio ponto br.
+</p>
+
+
+
+<h2><a name="Licenca">Licen&ccedil;a</a></h2>
+
+<p align="justify">
+Copyright &copy; 2007 S&eacute;rgio Medeiros.
+</p>
+
+<p align="justify">
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+</p>
+
+<p align="justify">
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+</p>
+
+<p align="justify">
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
+</p>
+
+
+
+</body>
+</html>
